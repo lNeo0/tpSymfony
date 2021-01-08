@@ -5,6 +5,12 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\HttpFoundation\Request;
+use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Articles;
 
 class TpController extends AbstractController
 {
@@ -13,8 +19,13 @@ class TpController extends AbstractController
      */
     public function index(): Response
     {
+        $repo = $this->getDoctrine()->getRepository(Articles::class);
+
+        $articles = $repo->findAll();
+
         return $this->render('tp/index.html.twig', [
             'controller_name' => 'ControllerTP',
+            'articles' => $articles
         ]);
     }
 
@@ -24,4 +35,69 @@ class TpController extends AbstractController
     public function home(){
         return $this->render('tp/home.html.twig');
     }
+
+        /**
+     * @Route("/tp/new", name="article_create")
+     */
+    public function create(Request $request, EntityManagerInterface $manager) {
+        $article = new Articles();
+
+        $form = $this->createFormBuilder($article)
+                    ->add('titre', TextType::class, [
+                        'attr' => [
+                            'placeholder' => "Titre de l'article",
+                            'class' => 'form-control'
+                        ]
+                    ])
+                    ->add('contenu', TextareaType::class, [
+                        'attr' => [
+                            'placeholder' => "Contenu de l'article",
+                            'class' => 'form-control'
+                        ]
+                    ])
+                    ->add('image', TextType::class, [
+                        'attr' => [
+                            'placeholder' => "Url de l'image",
+                            'class' => 'form-control'
+                        ]
+                    ])
+                    ->add('extraitContenu', TextType::class, [
+                        'attr' => [
+                            'placeholder' => "Introduction de l'article",
+                            'class' => 'form-control'
+                        ]
+                    ])
+                    ->getForm();
+                
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()){
+            $article->setDateCreation(new \DateTime());
+
+            $manager->persist($article);
+            $manager->flush();
+
+            return $this->redirectToRoute('tp_show', ['id' => $article->getId()]);
+        }
+
+
+
+        return $this->render('tp/create.html.twig', [
+            'formArticles' => $form->createView()
+        ]);
+    }
+
+    /**
+     * @Route("/tp/{id}", name="tp_show")
+     */
+        public function show($id){
+            $repo = $this->getDoctrine()->getRepository(Articles::class);
+
+            $article = $repo->find($id);
+
+            return $this->render('tp/show.html.twig', [
+                'article' => $article
+            ]);
+        }
+
 }
