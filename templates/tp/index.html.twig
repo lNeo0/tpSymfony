@@ -1,25 +1,27 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello {{controller_name}}!{% endblock %}
+{% block title %}TpSymfony{% endblock %}
 
 {% block body %}
 
-<h1> Liste des articles :</h1>
+<h1> Liste des articles </h1>
 
 <section class="articles">
 
     {% for article in articles %}
 
-        <article>
+        <article align="center">
         <br>
             <h2>{{ article.titre }}</h2>
-            <div class="metadata">Ecrit le {{ article.dateCreation | date ('d/m/Y') }} à {{ article.dateCreation | date ('H:i') }}</div>
+            <div class="metadata">Ecrit le {{ article.dateCreation | date ('d/m/Y') }} à {{ article.dateCreation | date ('H:i') }} dans la catégorie {{ article.categorie.titre }}</div><br>
             <div class"content">
-                <img src="{{ article.image }}" alt="">
-                {{ article.extraitContenu | raw}}
+                <img src="{{ article.image }}" alt=""><br><br>
+                {{ article.extraitContenu | raw}}<br><br>
                 <a href="{{ path('tp_show', {'id' : article.id}) }}" class="btn btn-primary"> Consulter l'article</a>
+                <a href="{{ path('tp_modif', {'id' : article.id}) }}" class="btn btn-warning">Modifier l'article</a>
             </div>
             <br>
+            <HR noshade size="5" width="70%" align="center">
         </article>
 
     {% endfor %}

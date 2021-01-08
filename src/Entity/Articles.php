@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\ArticlesRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=ArticlesRepository::class)
@@ -19,16 +20,19 @@ class Articles
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\Length(min=2, max=255)
      */
     private $titre;
 
     /**
      * @ORM\Column(type="text")
+     * @Assert\Length(min=10)
      */
     private $Contenu;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\Url()
      */
     private $image;
 
@@ -39,8 +43,15 @@ class Articles
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\Length(min=2, max=255)
      */
     private $extraitContenu;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Categorie::class, inversedBy="articles")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $categorie;
 
     public function getId(): ?int
     {
@@ -103,6 +114,18 @@ class Articles
     public function setExtraitContenu(string $extraitContenu): self
     {
         $this->extraitContenu = $extraitContenu;
+
+        return $this;
+    }
+
+    public function getCategorie(): ?Categorie
+    {
+        return $this->categorie;
+    }
+
+    public function setCategorie(?Categorie $categorie): self
+    {
+        $this->categorie = $categorie;
 
         return $this;
     }

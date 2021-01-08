@@ -8,9 +8,11 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Articles;
+use App\Entity\Categorie;
 
 class TpController extends AbstractController
 {
@@ -29,6 +31,7 @@ class TpController extends AbstractController
         ]);
     }
 
+
     /**
      * @Route("/", name="home")
      */
@@ -36,12 +39,17 @@ class TpController extends AbstractController
         return $this->render('tp/home.html.twig');
     }
 
+
         /**
      * @Route("/tp/new", name="article_create")
+     * @Route("/tp/{id}/modif", name="tp_modif")
      */
-    public function create(Request $request, EntityManagerInterface $manager) {
-        $article = new Articles();
+    public function gestionArticles(Articles $article = null, Request $request, EntityManagerInterface $manager) {
 
+        if(!$article){
+            $article = new Articles();
+        }
+        
         $form = $this->createFormBuilder($article)
                     ->add('titre', TextType::class, [
                         'attr' => [
@@ -49,11 +57,15 @@ class TpController extends AbstractController
                             'class' => 'form-control'
                         ]
                     ])
+                    ->add('categorie', EntityType::class,[
+                        'class' => Categorie::class,
+                        'choice_label' => 'titre',
+                    ])
                     ->add('contenu', TextareaType::class, [
                         'attr' => [
                             'placeholder' => "Contenu de l'article",
                             'class' => 'form-control'
-                        ]
+                        ],
                     ])
                     ->add('image', TextType::class, [
                         'attr' => [
@@ -72,20 +84,22 @@ class TpController extends AbstractController
         $form->handleRequest($request);
 
         if($form->isSubmitted() && $form->isValid()){
-            $article->setDateCreation(new \DateTime());
-
+            if(!$article->getId()){
+                $article->setDateCreation(new \DateTime());
+            }
+            
             $manager->persist($article);
             $manager->flush();
 
             return $this->redirectToRoute('tp_show', ['id' => $article->getId()]);
         }
 
-
-
         return $this->render('tp/create.html.twig', [
-            'formArticles' => $form->createView()
+            'formArticles' => $form->createView(),
+            'editMode' => $article->getId()!== null
         ]);
     }
+
 
     /**
      * @Route("/tp/{id}", name="tp_show")
@@ -99,5 +113,5 @@ class TpController extends AbstractController
                 'article' => $article
             ]);
         }
-
 }
+

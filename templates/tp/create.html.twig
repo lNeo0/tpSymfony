@@ -1,5 +1,7 @@
 {% extends 'base.html.twig' %}
 
+{% form_theme formArticles 'bootstrap_4_layout.html.twig' %}
+
 {% block body %}
 
     <h1>Création d'un article</h1>
@@ -9,6 +11,11 @@
     <div class ="form-group">
         <label for="">Titre</label>
         {{ form_widget(formArticles.titre) }}
+    </div>
+
+    <div class ="form-group">
+        <label for="">Catégorie</label>
+        {{ form_widget(formArticles.categorie) }}
     </div>
 
     <div class ="form-group">
@@ -26,7 +33,13 @@
         {{ form_widget(formArticles.extraitContenu) }}
     </div>
 
-    <button type="submit" class="btn btn-success">Ajouter l'article</button>
+    <button type="submit" class="btn btn-success">
+    {% if editMode %}
+        Enregistrer les modifications
+    {% else %}
+        Ajouter l'article
+    {% endif %}
+    </button>
 
     {{ form_end(formArticles) }}
 
